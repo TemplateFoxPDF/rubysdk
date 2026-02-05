@@ -21,12 +21,17 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["TemplateFox"]
   s.email       = ["support@pdftemplateapi.com"]
-  s.homepage    = "https://github.com/TemplateFoxPDF/rubysdk"
+  s.homepage    = "https://pdftemplateapi.com"
   s.summary     = "Official TemplateFox Ruby SDK"
   s.description = "Ruby SDK for TemplateFox - Generate PDFs from HTML templates via API"
   s.license     = "MIT"
   s.required_ruby_version = ">= 2.7"
-  s.metadata    = {}
+  s.metadata    = {
+    "source_code_uri"   => "https://github.com/TemplateFoxPDF/rubysdk",
+    "bug_tracker_uri"   => "https://github.com/TemplateFoxPDF/rubysdk/issues",
+    "documentation_uri" => "https://pdftemplateapi.com/docs",
+    "homepage_uri"      => "https://pdftemplateapi.com"
+  }
 
   s.add_runtime_dependency 'typhoeus', '~> 1.0', '>= 1.0.1'
 
