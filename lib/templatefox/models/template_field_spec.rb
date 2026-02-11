@@ -14,18 +14,22 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  class ValidationError < ApiModelBase
-    attr_accessor :loc
+  # Spec for array item fields
+  class TemplateFieldSpec < ApiModelBase
+    # Field name
+    attr_accessor :name
 
-    attr_accessor :msg
+    # Field label
+    attr_accessor :label
 
+    # Field type: text, number
     attr_accessor :type
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'loc' => :'loc',
-        :'msg' => :'msg',
+        :'name' => :'name',
+        :'label' => :'label',
         :'type' => :'type'
       }
     end
@@ -43,8 +47,8 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'loc' => :'Array<LocationInner>',
-        :'msg' => :'String',
+        :'name' => :'String',
+        :'label' => :'String',
         :'type' => :'String'
       }
     end
@@ -59,36 +63,34 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::ValidationError` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::TemplateFieldSpec` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::ValidationError`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::TemplateFieldSpec`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'loc')
-        if (value = attributes[:'loc']).is_a?(Array)
-          self.loc = value
-        end
+      if attributes.key?(:'name')
+        self.name = attributes[:'name']
       else
-        self.loc = nil
+        self.name = nil
       end
 
-      if attributes.key?(:'msg')
-        self.msg = attributes[:'msg']
+      if attributes.key?(:'label')
+        self.label = attributes[:'label']
       else
-        self.msg = nil
+        self.label = nil
       end
 
       if attributes.key?(:'type')
         self.type = attributes[:'type']
       else
-        self.type = nil
+        self.type = 'text'
       end
     end
 
@@ -97,16 +99,12 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @loc.nil?
-        invalid_properties.push('invalid value for "loc", loc cannot be nil.')
+      if @name.nil?
+        invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
 
-      if @msg.nil?
-        invalid_properties.push('invalid value for "msg", msg cannot be nil.')
-      end
-
-      if @type.nil?
-        invalid_properties.push('invalid value for "type", type cannot be nil.')
+      if @label.nil?
+        invalid_properties.push('invalid value for "label", label cannot be nil.')
       end
 
       invalid_properties
@@ -116,40 +114,29 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @loc.nil?
-      return false if @msg.nil?
-      return false if @type.nil?
+      return false if @name.nil?
+      return false if @label.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] loc Value to be assigned
-    def loc=(loc)
-      if loc.nil?
-        fail ArgumentError, 'loc cannot be nil'
+    # @param [Object] name Value to be assigned
+    def name=(name)
+      if name.nil?
+        fail ArgumentError, 'name cannot be nil'
       end
 
-      @loc = loc
+      @name = name
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] msg Value to be assigned
-    def msg=(msg)
-      if msg.nil?
-        fail ArgumentError, 'msg cannot be nil'
+    # @param [Object] label Value to be assigned
+    def label=(label)
+      if label.nil?
+        fail ArgumentError, 'label cannot be nil'
       end
 
-      @msg = msg
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] type Value to be assigned
-    def type=(type)
-      if type.nil?
-        fail ArgumentError, 'type cannot be nil'
-      end
-
-      @type = type
+      @label = label
     end
 
     # Checks equality by comparing each attribute.
@@ -157,8 +144,8 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          loc == o.loc &&
-          msg == o.msg &&
+          name == o.name &&
+          label == o.label &&
           type == o.type
     end
 
@@ -171,7 +158,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [loc, msg, type].hash
+      [name, label, type].hash
     end
 
     # Builds the object from hash

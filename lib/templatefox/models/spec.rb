@@ -14,13 +14,14 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  module LocationInner
+  # For array fields: spec defining the structure of each item
+  module Spec
     class << self
       # List of class defined in anyOf (OpenAPI v3)
       def openapi_any_of
         [
-          :'Integer',
-          :'String'
+          :'Array<TemplateFieldSpec>',
+          :'TemplateFieldSpec'
         ]
       end
 
