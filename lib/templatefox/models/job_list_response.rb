@@ -14,23 +14,24 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  # Response for transactions list endpoint
-  class TransactionsResponse < ApiModelBase
-    attr_accessor :transactions
+  # Response for job list query
+  class JobListResponse < ApiModelBase
+    # List of jobs
+    attr_accessor :jobs
 
-    # Total number of transactions
+    # Total number of jobs matching filter
     attr_accessor :total
 
-    # Number of records returned
+    # Page size
     attr_accessor :limit
 
-    # Number of records skipped
+    # Page offset
     attr_accessor :offset
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'transactions' => :'transactions',
+        :'jobs' => :'jobs',
         :'total' => :'total',
         :'limit' => :'limit',
         :'offset' => :'offset'
@@ -50,7 +51,7 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'transactions' => :'Array<Transaction>',
+        :'jobs' => :'Array<JobStatusResponse>',
         :'total' => :'Integer',
         :'limit' => :'Integer',
         :'offset' => :'Integer'
@@ -67,24 +68,24 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::TransactionsResponse` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::JobListResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::TransactionsResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::JobListResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'transactions')
-        if (value = attributes[:'transactions']).is_a?(Array)
-          self.transactions = value
+      if attributes.key?(:'jobs')
+        if (value = attributes[:'jobs']).is_a?(Array)
+          self.jobs = value
         end
       else
-        self.transactions = nil
+        self.jobs = nil
       end
 
       if attributes.key?(:'total')
@@ -111,8 +112,8 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @transactions.nil?
-        invalid_properties.push('invalid value for "transactions", transactions cannot be nil.')
+      if @jobs.nil?
+        invalid_properties.push('invalid value for "jobs", jobs cannot be nil.')
       end
 
       if @total.nil?
@@ -134,7 +135,7 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @transactions.nil?
+      return false if @jobs.nil?
       return false if @total.nil?
       return false if @limit.nil?
       return false if @offset.nil?
@@ -142,13 +143,13 @@ module TemplateFox
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] transactions Value to be assigned
-    def transactions=(transactions)
-      if transactions.nil?
-        fail ArgumentError, 'transactions cannot be nil'
+    # @param [Object] jobs Value to be assigned
+    def jobs=(jobs)
+      if jobs.nil?
+        fail ArgumentError, 'jobs cannot be nil'
       end
 
-      @transactions = transactions
+      @jobs = jobs
     end
 
     # Custom attribute writer method with validation
@@ -186,7 +187,7 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          transactions == o.transactions &&
+          jobs == o.jobs &&
           total == o.total &&
           limit == o.limit &&
           offset == o.offset
@@ -201,7 +202,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [transactions, total, limit, offset].hash
+      [jobs, total, limit, offset].hash
     end
 
     # Builds the object from hash

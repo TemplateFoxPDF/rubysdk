@@ -14,26 +14,45 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  # Response for transactions list endpoint
-  class TransactionsResponse < ApiModelBase
-    attr_accessor :transactions
+  # Response for async PDF creation
+  class CreateAsyncPdfResponse < ApiModelBase
+    # Unique job identifier for status polling
+    attr_accessor :job_id
 
-    # Total number of transactions
-    attr_accessor :total
+    # Initial job status (always 'pending')
+    attr_accessor :status
 
-    # Number of records returned
-    attr_accessor :limit
+    # Remaining credits after this request
+    attr_accessor :credits_remaining
 
-    # Number of records skipped
-    attr_accessor :offset
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
+
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
+
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'transactions' => :'transactions',
-        :'total' => :'total',
-        :'limit' => :'limit',
-        :'offset' => :'offset'
+        :'job_id' => :'job_id',
+        :'status' => :'status',
+        :'credits_remaining' => :'credits_remaining'
       }
     end
 
@@ -50,10 +69,9 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'transactions' => :'Array<Transaction>',
-        :'total' => :'Integer',
-        :'limit' => :'Integer',
-        :'offset' => :'Integer'
+        :'job_id' => :'String',
+        :'status' => :'JobStatus',
+        :'credits_remaining' => :'Integer'
       }
     end
 
@@ -67,42 +85,34 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::TransactionsResponse` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreateAsyncPdfResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::TransactionsResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreateAsyncPdfResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'transactions')
-        if (value = attributes[:'transactions']).is_a?(Array)
-          self.transactions = value
-        end
+      if attributes.key?(:'job_id')
+        self.job_id = attributes[:'job_id']
       else
-        self.transactions = nil
+        self.job_id = nil
       end
 
-      if attributes.key?(:'total')
-        self.total = attributes[:'total']
+      if attributes.key?(:'status')
+        self.status = attributes[:'status']
       else
-        self.total = nil
+        self.status = nil
       end
 
-      if attributes.key?(:'limit')
-        self.limit = attributes[:'limit']
+      if attributes.key?(:'credits_remaining')
+        self.credits_remaining = attributes[:'credits_remaining']
       else
-        self.limit = nil
-      end
-
-      if attributes.key?(:'offset')
-        self.offset = attributes[:'offset']
-      else
-        self.offset = nil
+        self.credits_remaining = nil
       end
     end
 
@@ -111,20 +121,16 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @transactions.nil?
-        invalid_properties.push('invalid value for "transactions", transactions cannot be nil.')
+      if @job_id.nil?
+        invalid_properties.push('invalid value for "job_id", job_id cannot be nil.')
       end
 
-      if @total.nil?
-        invalid_properties.push('invalid value for "total", total cannot be nil.')
+      if @status.nil?
+        invalid_properties.push('invalid value for "status", status cannot be nil.')
       end
 
-      if @limit.nil?
-        invalid_properties.push('invalid value for "limit", limit cannot be nil.')
-      end
-
-      if @offset.nil?
-        invalid_properties.push('invalid value for "offset", offset cannot be nil.')
+      if @credits_remaining.nil?
+        invalid_properties.push('invalid value for "credits_remaining", credits_remaining cannot be nil.')
       end
 
       invalid_properties
@@ -134,51 +140,40 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @transactions.nil?
-      return false if @total.nil?
-      return false if @limit.nil?
-      return false if @offset.nil?
+      return false if @job_id.nil?
+      return false if @status.nil?
+      return false if @credits_remaining.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] transactions Value to be assigned
-    def transactions=(transactions)
-      if transactions.nil?
-        fail ArgumentError, 'transactions cannot be nil'
+    # @param [Object] job_id Value to be assigned
+    def job_id=(job_id)
+      if job_id.nil?
+        fail ArgumentError, 'job_id cannot be nil'
       end
 
-      @transactions = transactions
+      @job_id = job_id
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] total Value to be assigned
-    def total=(total)
-      if total.nil?
-        fail ArgumentError, 'total cannot be nil'
+    # @param [Object] status Value to be assigned
+    def status=(status)
+      if status.nil?
+        fail ArgumentError, 'status cannot be nil'
       end
 
-      @total = total
+      @status = status
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] limit Value to be assigned
-    def limit=(limit)
-      if limit.nil?
-        fail ArgumentError, 'limit cannot be nil'
+    # @param [Object] credits_remaining Value to be assigned
+    def credits_remaining=(credits_remaining)
+      if credits_remaining.nil?
+        fail ArgumentError, 'credits_remaining cannot be nil'
       end
 
-      @limit = limit
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] offset Value to be assigned
-    def offset=(offset)
-      if offset.nil?
-        fail ArgumentError, 'offset cannot be nil'
-      end
-
-      @offset = offset
+      @credits_remaining = credits_remaining
     end
 
     # Checks equality by comparing each attribute.
@@ -186,10 +181,9 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          transactions == o.transactions &&
-          total == o.total &&
-          limit == o.limit &&
-          offset == o.offset
+          job_id == o.job_id &&
+          status == o.status &&
+          credits_remaining == o.credits_remaining
     end
 
     # @see the `==` method
@@ -201,7 +195,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [transactions, total, limit, offset].hash
+      [job_id, status, credits_remaining].hash
     end
 
     # Builds the object from hash

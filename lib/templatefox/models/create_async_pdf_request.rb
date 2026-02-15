@@ -14,28 +14,32 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  # Request model for PDF generation
-  class CreatePdfRequest < ApiModelBase
+  # Request model for async PDF generation
+  class CreateAsyncPdfRequest < ApiModelBase
     # **Required.** Template short ID (12 characters)
     attr_accessor :template_id
 
-    # **Required.** Key-value data to render in the template. Keys must match template variables.
+    # **Required.** Key-value data to render in the template.
     attr_accessor :data
 
-    # Export format: `url` uploads to CDN and returns URL, `binary` returns raw PDF bytes
+    # Export format. Currently only `url` is supported for async.
     attr_accessor :export_type
 
-    # URL expiration in seconds. Min: 60 (1 min), Max: 604800 (7 days). Only applies to `url` export type.
+    # URL expiration in seconds (60-604800). Default: 86400 (24 hours).
     attr_accessor :expiration
 
     attr_accessor :filename
 
-    # Upload to your configured S3 bucket instead of CDN
+    # Upload to your configured S3 bucket instead of CDN.
     attr_accessor :store_s3
 
     attr_accessor :s3_filepath
 
     attr_accessor :s3_bucket
+
+    attr_accessor :webhook_url
+
+    attr_accessor :webhook_secret
 
     class EnumAttributeValidator
       attr_reader :datatype
@@ -69,7 +73,9 @@ module TemplateFox
         :'filename' => :'filename',
         :'store_s3' => :'store_s3',
         :'s3_filepath' => :'s3_filepath',
-        :'s3_bucket' => :'s3_bucket'
+        :'s3_bucket' => :'s3_bucket',
+        :'webhook_url' => :'webhook_url',
+        :'webhook_secret' => :'webhook_secret'
       }
     end
 
@@ -88,12 +94,14 @@ module TemplateFox
       {
         :'template_id' => :'String',
         :'data' => :'Hash<String, Object>',
-        :'export_type' => :'AppRoutersV1PdfExportType',
+        :'export_type' => :'AppRoutersV1PdfAsyncExportType',
         :'expiration' => :'Integer',
         :'filename' => :'String',
         :'store_s3' => :'Boolean',
         :'s3_filepath' => :'String',
-        :'s3_bucket' => :'String'
+        :'s3_bucket' => :'String',
+        :'webhook_url' => :'String',
+        :'webhook_secret' => :'String'
       }
     end
 
@@ -102,7 +110,9 @@ module TemplateFox
       Set.new([
         :'filename',
         :'s3_filepath',
-        :'s3_bucket'
+        :'s3_bucket',
+        :'webhook_url',
+        :'webhook_secret'
       ])
     end
 
@@ -110,14 +120,14 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreatePdfRequest` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreateAsyncPdfRequest` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreatePdfRequest`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreateAsyncPdfRequest`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
@@ -162,6 +172,14 @@ module TemplateFox
 
       if attributes.key?(:'s3_bucket')
         self.s3_bucket = attributes[:'s3_bucket']
+      end
+
+      if attributes.key?(:'webhook_url')
+        self.webhook_url = attributes[:'webhook_url']
+      end
+
+      if attributes.key?(:'webhook_secret')
+        self.webhook_secret = attributes[:'webhook_secret']
       end
     end
 
@@ -225,6 +243,22 @@ module TemplateFox
         invalid_properties.push("invalid value for \"s3_bucket\", must conform to the pattern #{pattern}.")
       end
 
+      if !@webhook_url.nil? && @webhook_url.to_s.length > 2083
+        invalid_properties.push('invalid value for "webhook_url", the character length must be smaller than or equal to 2083.')
+      end
+
+      if !@webhook_url.nil? && @webhook_url.to_s.length < 1
+        invalid_properties.push('invalid value for "webhook_url", the character length must be greater than or equal to 1.')
+      end
+
+      if !@webhook_secret.nil? && @webhook_secret.to_s.length > 256
+        invalid_properties.push('invalid value for "webhook_secret", the character length must be smaller than or equal to 256.')
+      end
+
+      if !@webhook_secret.nil? && @webhook_secret.to_s.length < 16
+        invalid_properties.push('invalid value for "webhook_secret", the character length must be greater than or equal to 16.')
+      end
+
       invalid_properties
     end
 
@@ -245,6 +279,10 @@ module TemplateFox
       return false if !@s3_bucket.nil? && @s3_bucket.to_s.length > 63
       return false if !@s3_bucket.nil? && @s3_bucket.to_s.length < 3
       return false if !@s3_bucket.nil? && @s3_bucket !~ Regexp.new(/^[a-z0-9][a-z0-9.\-]*[a-z0-9]$/)
+      return false if !@webhook_url.nil? && @webhook_url.to_s.length > 2083
+      return false if !@webhook_url.nil? && @webhook_url.to_s.length < 1
+      return false if !@webhook_secret.nil? && @webhook_secret.to_s.length > 256
+      return false if !@webhook_secret.nil? && @webhook_secret.to_s.length < 16
       true
     end
 
@@ -343,6 +381,34 @@ module TemplateFox
       @s3_bucket = s3_bucket
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] webhook_url Value to be assigned
+    def webhook_url=(webhook_url)
+      if !webhook_url.nil? && webhook_url.to_s.length > 2083
+        fail ArgumentError, 'invalid value for "webhook_url", the character length must be smaller than or equal to 2083.'
+      end
+
+      if !webhook_url.nil? && webhook_url.to_s.length < 1
+        fail ArgumentError, 'invalid value for "webhook_url", the character length must be greater than or equal to 1.'
+      end
+
+      @webhook_url = webhook_url
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] webhook_secret Value to be assigned
+    def webhook_secret=(webhook_secret)
+      if !webhook_secret.nil? && webhook_secret.to_s.length > 256
+        fail ArgumentError, 'invalid value for "webhook_secret", the character length must be smaller than or equal to 256.'
+      end
+
+      if !webhook_secret.nil? && webhook_secret.to_s.length < 16
+        fail ArgumentError, 'invalid value for "webhook_secret", the character length must be greater than or equal to 16.'
+      end
+
+      @webhook_secret = webhook_secret
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -355,7 +421,9 @@ module TemplateFox
           filename == o.filename &&
           store_s3 == o.store_s3 &&
           s3_filepath == o.s3_filepath &&
-          s3_bucket == o.s3_bucket
+          s3_bucket == o.s3_bucket &&
+          webhook_url == o.webhook_url &&
+          webhook_secret == o.webhook_secret
     end
 
     # @see the `==` method
@@ -367,7 +435,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [template_id, data, export_type, expiration, filename, store_s3, s3_filepath, s3_bucket].hash
+      [template_id, data, export_type, expiration, filename, store_s3, s3_filepath, s3_bucket, webhook_url, webhook_secret].hash
     end
 
     # Builds the object from hash
