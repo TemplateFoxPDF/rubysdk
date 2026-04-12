@@ -14,45 +14,14 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  # Response for async PDF creation
-  class CreateAsyncPdfResponse < ApiModelBase
-    # Unique job identifier for status polling
-    attr_accessor :job_id
-
-    # Initial job status (always 'pending')
-    attr_accessor :status
-
-    # Remaining credits after this request
-    attr_accessor :credits_remaining
-
-    class EnumAttributeValidator
-      attr_reader :datatype
-      attr_reader :allowable_values
-
-      def initialize(datatype, allowable_values)
-        @allowable_values = allowable_values.map do |value|
-          case datatype.to_s
-          when /Integer/i
-            value.to_i
-          when /Float/i
-            value.to_f
-          else
-            value
-          end
-        end
-      end
-
-      def valid?(value)
-        !value || allowable_values.include?(value)
-      end
-    end
+  # Response for versions list
+  class VersionsListResponse < ApiModelBase
+    attr_accessor :versions
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'job_id' => :'job_id',
-        :'status' => :'status',
-        :'credits_remaining' => :'credits_remaining'
+        :'versions' => :'versions'
       }
     end
 
@@ -69,9 +38,7 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'job_id' => :'String',
-        :'status' => :'JobStatus',
-        :'credits_remaining' => :'Integer'
+        :'versions' => :'Array<VersionItem>'
       }
     end
 
@@ -85,34 +52,24 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreateAsyncPdfResponse` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::VersionsListResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreateAsyncPdfResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::VersionsListResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'job_id')
-        self.job_id = attributes[:'job_id']
+      if attributes.key?(:'versions')
+        if (value = attributes[:'versions']).is_a?(Array)
+          self.versions = value
+        end
       else
-        self.job_id = nil
-      end
-
-      if attributes.key?(:'status')
-        self.status = attributes[:'status']
-      else
-        self.status = nil
-      end
-
-      if attributes.key?(:'credits_remaining')
-        self.credits_remaining = attributes[:'credits_remaining']
-      else
-        self.credits_remaining = nil
+        self.versions = nil
       end
     end
 
@@ -121,16 +78,8 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @job_id.nil?
-        invalid_properties.push('invalid value for "job_id", job_id cannot be nil.')
-      end
-
-      if @status.nil?
-        invalid_properties.push('invalid value for "status", status cannot be nil.')
-      end
-
-      if @credits_remaining.nil?
-        invalid_properties.push('invalid value for "credits_remaining", credits_remaining cannot be nil.')
+      if @versions.nil?
+        invalid_properties.push('invalid value for "versions", versions cannot be nil.')
       end
 
       invalid_properties
@@ -140,40 +89,18 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @job_id.nil?
-      return false if @status.nil?
-      return false if @credits_remaining.nil?
+      return false if @versions.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] job_id Value to be assigned
-    def job_id=(job_id)
-      if job_id.nil?
-        fail ArgumentError, 'job_id cannot be nil'
+    # @param [Object] versions Value to be assigned
+    def versions=(versions)
+      if versions.nil?
+        fail ArgumentError, 'versions cannot be nil'
       end
 
-      @job_id = job_id
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] status Value to be assigned
-    def status=(status)
-      if status.nil?
-        fail ArgumentError, 'status cannot be nil'
-      end
-
-      @status = status
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] credits_remaining Value to be assigned
-    def credits_remaining=(credits_remaining)
-      if credits_remaining.nil?
-        fail ArgumentError, 'credits_remaining cannot be nil'
-      end
-
-      @credits_remaining = credits_remaining
+      @versions = versions
     end
 
     # Checks equality by comparing each attribute.
@@ -181,9 +108,7 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          job_id == o.job_id &&
-          status == o.status &&
-          credits_remaining == o.credits_remaining
+          versions == o.versions
     end
 
     # @see the `==` method
@@ -195,7 +120,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [job_id, status, credits_remaining].hash
+      [versions].hash
     end
 
     # Builds the object from hash

@@ -1,6 +1,6 @@
 # TemplateFox Ruby SDK
 
-Official Ruby SDK for [TemplateFox](https://pdftemplateapi.com) - Generate PDFs from HTML templates via API.
+Official Ruby SDK for [TemplateFox](https://templatefox.com) - Generate PDFs from HTML templates via API.
 
 [![Gem Version](https://badge.fury.io/rb/templatefox.svg)](https://rubygems.org/gems/templatefox)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -139,7 +139,7 @@ puts "Connection: #{test.success ? 'OK' : 'Failed'}"
 
 ```ruby
 TemplateFox.configure do |config|
-  config.host = 'https://api.pdftemplateapi.com'  # Default API URL
+  config.host = 'https://api.templatefox.com'  # Default API URL
   config.api_key['ApiKeyAuth'] = ENV['TEMPLATEFOX_API_KEY']
 
   # Optional: Enable debugging
@@ -192,13 +192,13 @@ end
 
 ## Documentation
 
-- [API Documentation](https://pdftemplateapi.com/docs)
-- [Swagger UI](https://api.pdftemplateapi.com/docs)
-- [Dashboard](https://pdftemplateapi.com/dashboard)
+- [API Documentation](https://templatefox.com/docs)
+- [Swagger UI](https://api.templatefox.com/docs)
+- [Dashboard](https://templatefox.com/dashboard)
 
 ## Support
 
-- Email: support@pdftemplateapi.com
+- Email: support@templatefox.com
 - Issues: [GitHub Issues](https://github.com/TemplateFoxPDF/rubysdk/issues)
 
 ## License
