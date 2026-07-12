@@ -14,11 +14,12 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  class AppRoutersV1PdfAsyncExportType
+  class AppRoutersV1DeliveryExportType
     URL = "url".freeze
+    BINARY = "binary".freeze
 
     def self.all_vars
-      @all_vars ||= [URL].freeze
+      @all_vars ||= [URL, BINARY].freeze
     end
 
     # Builds the enum from string
@@ -32,8 +33,8 @@ module TemplateFox
     # @param [String] The enum value in the form of the string
     # @return [String] The enum value
     def build_from_hash(value)
-      return value if AppRoutersV1PdfAsyncExportType.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #AppRoutersV1PdfAsyncExportType"
+      return value if AppRoutersV1DeliveryExportType.all_vars.include?(value)
+      raise "Invalid ENUM value #{value} for class #AppRoutersV1DeliveryExportType"
     end
   end
 end

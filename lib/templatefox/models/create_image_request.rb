@@ -14,15 +14,25 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  # Request model for PDF generation
-  class CreatePdfRequest < ApiModelBase
+  # Request model for image generation
+  class CreateImageRequest < ApiModelBase
     # Template short ID (12 characters)
     attr_accessor :template_id
 
-    # Key-value data to render in the template. Keys must match template variables.
+    attr_accessor :modifications
+
+    # Optional key-value data merged into `{{ }}` template variables. For most image templates, prefer `modifications` instead.
     attr_accessor :data
 
-    # Export format: `url` uploads to CDN and returns URL, `binary` returns raw PDF bytes
+    # Output image format: `png` (default), `jpeg` or `webp`.
+    attr_accessor :format
+
+    attr_accessor :width
+
+    # Compression quality for `jpeg`/`webp` (1-100). Ignored for `png`.
+    attr_accessor :quality
+
+    # Export format: `url` uploads to CDN and returns URL, `binary` returns raw image bytes
     attr_accessor :export_type
 
     # URL expiration in seconds. Min: 60 (1 min), Max: 604800 (7 days). Only applies to `url` export type.
@@ -36,8 +46,6 @@ module TemplateFox
     attr_accessor :s3_filepath
 
     attr_accessor :s3_bucket
-
-    attr_accessor :pdf_variant
 
     attr_accessor :version
 
@@ -67,14 +75,17 @@ module TemplateFox
     def self.attribute_map
       {
         :'template_id' => :'template_id',
+        :'modifications' => :'modifications',
         :'data' => :'data',
+        :'format' => :'format',
+        :'width' => :'width',
+        :'quality' => :'quality',
         :'export_type' => :'export_type',
         :'expiration' => :'expiration',
         :'filename' => :'filename',
         :'store_s3' => :'store_s3',
         :'s3_filepath' => :'s3_filepath',
         :'s3_bucket' => :'s3_bucket',
-        :'pdf_variant' => :'pdf_variant',
         :'version' => :'version'
       }
     end
@@ -93,14 +104,17 @@ module TemplateFox
     def self.openapi_types
       {
         :'template_id' => :'String',
+        :'modifications' => :'Array<Modification>',
         :'data' => :'Hash<String, Object>',
+        :'format' => :'ImageFormat',
+        :'width' => :'Integer',
+        :'quality' => :'Integer',
         :'export_type' => :'AppRoutersV1DeliveryExportType',
         :'expiration' => :'Integer',
         :'filename' => :'String',
         :'store_s3' => :'Boolean',
         :'s3_filepath' => :'String',
         :'s3_bucket' => :'String',
-        :'pdf_variant' => :'PdfVariant',
         :'version' => :'String'
       }
     end
@@ -108,10 +122,11 @@ module TemplateFox
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'modifications',
+        :'width',
         :'filename',
         :'s3_filepath',
         :'s3_bucket',
-        :'pdf_variant',
         :'version'
       ])
     end
@@ -120,14 +135,14 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreatePdfRequest` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreateImageRequest` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreatePdfRequest`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreateImageRequest`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
@@ -138,12 +153,30 @@ module TemplateFox
         self.template_id = nil
       end
 
+      if attributes.key?(:'modifications')
+        if (value = attributes[:'modifications']).is_a?(Array)
+          self.modifications = value
+        end
+      end
+
       if attributes.key?(:'data')
         if (value = attributes[:'data']).is_a?(Hash)
           self.data = value
         end
+      end
+
+      if attributes.key?(:'format')
+        self.format = attributes[:'format']
+      end
+
+      if attributes.key?(:'width')
+        self.width = attributes[:'width']
+      end
+
+      if attributes.key?(:'quality')
+        self.quality = attributes[:'quality']
       else
-        self.data = nil
+        self.quality = 85
       end
 
       if attributes.key?(:'export_type')
@@ -174,10 +207,6 @@ module TemplateFox
         self.s3_bucket = attributes[:'s3_bucket']
       end
 
-      if attributes.key?(:'pdf_variant')
-        self.pdf_variant = attributes[:'pdf_variant']
-      end
-
       if attributes.key?(:'version')
         self.version = attributes[:'version']
       end
@@ -200,8 +229,24 @@ module TemplateFox
         invalid_properties.push('invalid value for "template_id", the character length must be greater than or equal to 12.')
       end
 
-      if @data.nil?
-        invalid_properties.push('invalid value for "data", data cannot be nil.')
+      if !@modifications.nil? && @modifications.length > 100
+        invalid_properties.push('invalid value for "modifications", number of items must be less than or equal to 100.')
+      end
+
+      if !@width.nil? && @width > 4000
+        invalid_properties.push('invalid value for "width", must be smaller than or equal to 4000.')
+      end
+
+      if !@width.nil? && @width < 100
+        invalid_properties.push('invalid value for "width", must be greater than or equal to 100.')
+      end
+
+      if !@quality.nil? && @quality > 100
+        invalid_properties.push('invalid value for "quality", must be smaller than or equal to 100.')
+      end
+
+      if !@quality.nil? && @quality < 1
+        invalid_properties.push('invalid value for "quality", must be greater than or equal to 1.')
       end
 
       if !@expiration.nil? && @expiration > 604800
@@ -257,7 +302,11 @@ module TemplateFox
       return false if @template_id.nil?
       return false if @template_id.to_s.length > 12
       return false if @template_id.to_s.length < 12
-      return false if @data.nil?
+      return false if !@modifications.nil? && @modifications.length > 100
+      return false if !@width.nil? && @width > 4000
+      return false if !@width.nil? && @width < 100
+      return false if !@quality.nil? && @quality > 100
+      return false if !@quality.nil? && @quality < 1
       return false if !@expiration.nil? && @expiration > 604800
       return false if !@expiration.nil? && @expiration < 60
       return false if !@filename.nil? && @filename.to_s.length > 100
@@ -290,13 +339,45 @@ module TemplateFox
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] data Value to be assigned
-    def data=(data)
-      if data.nil?
-        fail ArgumentError, 'data cannot be nil'
+    # @param [Object] modifications Value to be assigned
+    def modifications=(modifications)
+      if !modifications.nil? && modifications.length > 100
+        fail ArgumentError, 'invalid value for "modifications", number of items must be less than or equal to 100.'
       end
 
-      @data = data
+      @modifications = modifications
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] width Value to be assigned
+    def width=(width)
+      if !width.nil? && width > 4000
+        fail ArgumentError, 'invalid value for "width", must be smaller than or equal to 4000.'
+      end
+
+      if !width.nil? && width < 100
+        fail ArgumentError, 'invalid value for "width", must be greater than or equal to 100.'
+      end
+
+      @width = width
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] quality Value to be assigned
+    def quality=(quality)
+      if quality.nil?
+        fail ArgumentError, 'quality cannot be nil'
+      end
+
+      if quality > 100
+        fail ArgumentError, 'invalid value for "quality", must be smaller than or equal to 100.'
+      end
+
+      if quality < 1
+        fail ArgumentError, 'invalid value for "quality", must be greater than or equal to 1.'
+      end
+
+      @quality = quality
     end
 
     # Custom attribute writer method with validation
@@ -382,14 +463,17 @@ module TemplateFox
       return true if self.equal?(o)
       self.class == o.class &&
           template_id == o.template_id &&
+          modifications == o.modifications &&
           data == o.data &&
+          format == o.format &&
+          width == o.width &&
+          quality == o.quality &&
           export_type == o.export_type &&
           expiration == o.expiration &&
           filename == o.filename &&
           store_s3 == o.store_s3 &&
           s3_filepath == o.s3_filepath &&
           s3_bucket == o.s3_bucket &&
-          pdf_variant == o.pdf_variant &&
           version == o.version
     end
 
@@ -402,7 +486,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [template_id, data, export_type, expiration, filename, store_s3, s3_filepath, s3_bucket, pdf_variant, version].hash
+      [template_id, modifications, data, format, width, quality, export_type, expiration, filename, store_s3, s3_filepath, s3_bucket, version].hash
     end
 
     # Builds the object from hash

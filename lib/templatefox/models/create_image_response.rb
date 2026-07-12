@@ -14,18 +14,30 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  # Response for account info endpoint
-  class AccountInfoResponse < ApiModelBase
-    # Remaining credits
-    attr_accessor :credits
+  # Response for URL export type
+  class CreateImageResponse < ApiModelBase
+    # Signed URL to download the image (expires after specified time)
+    attr_accessor :url
 
-    attr_accessor :email
+    # Filename of the generated image
+    attr_accessor :filename
+
+    # Remaining credits after this request
+    attr_accessor :credits_remaining
+
+    # Seconds until the signed URL expires
+    attr_accessor :expires_in
+
+    attr_accessor :warnings
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'credits' => :'credits',
-        :'email' => :'email'
+        :'url' => :'url',
+        :'filename' => :'filename',
+        :'credits_remaining' => :'credits_remaining',
+        :'expires_in' => :'expires_in',
+        :'warnings' => :'warnings'
       }
     end
 
@@ -42,15 +54,18 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'credits' => :'Integer',
-        :'email' => :'String'
+        :'url' => :'String',
+        :'filename' => :'String',
+        :'credits_remaining' => :'Integer',
+        :'expires_in' => :'Integer',
+        :'warnings' => :'Array<String>'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
-        :'email'
+        :'warnings'
       ])
     end
 
@@ -58,26 +73,46 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::AccountInfoResponse` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::CreateImageResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::AccountInfoResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::CreateImageResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'credits')
-        self.credits = attributes[:'credits']
+      if attributes.key?(:'url')
+        self.url = attributes[:'url']
       else
-        self.credits = nil
+        self.url = nil
       end
 
-      if attributes.key?(:'email')
-        self.email = attributes[:'email']
+      if attributes.key?(:'filename')
+        self.filename = attributes[:'filename']
+      else
+        self.filename = nil
+      end
+
+      if attributes.key?(:'credits_remaining')
+        self.credits_remaining = attributes[:'credits_remaining']
+      else
+        self.credits_remaining = nil
+      end
+
+      if attributes.key?(:'expires_in')
+        self.expires_in = attributes[:'expires_in']
+      else
+        self.expires_in = nil
+      end
+
+      if attributes.key?(:'warnings')
+        if (value = attributes[:'warnings']).is_a?(Array)
+          self.warnings = value
+        end
       end
     end
 
@@ -86,8 +121,20 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @credits.nil?
-        invalid_properties.push('invalid value for "credits", credits cannot be nil.')
+      if @url.nil?
+        invalid_properties.push('invalid value for "url", url cannot be nil.')
+      end
+
+      if @filename.nil?
+        invalid_properties.push('invalid value for "filename", filename cannot be nil.')
+      end
+
+      if @credits_remaining.nil?
+        invalid_properties.push('invalid value for "credits_remaining", credits_remaining cannot be nil.')
+      end
+
+      if @expires_in.nil?
+        invalid_properties.push('invalid value for "expires_in", expires_in cannot be nil.')
       end
 
       invalid_properties
@@ -97,18 +144,51 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @credits.nil?
+      return false if @url.nil?
+      return false if @filename.nil?
+      return false if @credits_remaining.nil?
+      return false if @expires_in.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] credits Value to be assigned
-    def credits=(credits)
-      if credits.nil?
-        fail ArgumentError, 'credits cannot be nil'
+    # @param [Object] url Value to be assigned
+    def url=(url)
+      if url.nil?
+        fail ArgumentError, 'url cannot be nil'
       end
 
-      @credits = credits
+      @url = url
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] filename Value to be assigned
+    def filename=(filename)
+      if filename.nil?
+        fail ArgumentError, 'filename cannot be nil'
+      end
+
+      @filename = filename
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] credits_remaining Value to be assigned
+    def credits_remaining=(credits_remaining)
+      if credits_remaining.nil?
+        fail ArgumentError, 'credits_remaining cannot be nil'
+      end
+
+      @credits_remaining = credits_remaining
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] expires_in Value to be assigned
+    def expires_in=(expires_in)
+      if expires_in.nil?
+        fail ArgumentError, 'expires_in cannot be nil'
+      end
+
+      @expires_in = expires_in
     end
 
     # Checks equality by comparing each attribute.
@@ -116,8 +196,11 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          credits == o.credits &&
-          email == o.email
+          url == o.url &&
+          filename == o.filename &&
+          credits_remaining == o.credits_remaining &&
+          expires_in == o.expires_in &&
+          warnings == o.warnings
     end
 
     # @see the `==` method
@@ -129,7 +212,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [credits, email].hash
+      [url, filename, credits_remaining, expires_in, warnings].hash
     end
 
     # Builds the object from hash
