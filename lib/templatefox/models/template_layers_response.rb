@@ -14,13 +14,18 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  class HTTPValidationError < ApiModelBase
-    attr_accessor :detail
+  # Response for template layers endpoint
+  class TemplateLayersResponse < ApiModelBase
+    attr_accessor :layers
+
+    # Non-fatal issues (e.g. duplicate layer names)
+    attr_accessor :warnings
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'detail' => :'detail'
+        :'layers' => :'layers',
+        :'warnings' => :'warnings'
       }
     end
 
@@ -37,7 +42,8 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'detail' => :'Array<ValidationError>'
+        :'layers' => :'Array<TemplateLayer>',
+        :'warnings' => :'Array<String>'
       }
     end
 
@@ -51,21 +57,29 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::HTTPValidationError` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::TemplateLayersResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::HTTPValidationError`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::TemplateLayersResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'detail')
-        if (value = attributes[:'detail']).is_a?(Array)
-          self.detail = value
+      if attributes.key?(:'layers')
+        if (value = attributes[:'layers']).is_a?(Array)
+          self.layers = value
+        end
+      else
+        self.layers = nil
+      end
+
+      if attributes.key?(:'warnings')
+        if (value = attributes[:'warnings']).is_a?(Array)
+          self.warnings = value
         end
       end
     end
@@ -75,6 +89,10 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @layers.nil?
+        invalid_properties.push('invalid value for "layers", layers cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -82,7 +100,18 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @layers.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] layers Value to be assigned
+    def layers=(layers)
+      if layers.nil?
+        fail ArgumentError, 'layers cannot be nil'
+      end
+
+      @layers = layers
     end
 
     # Checks equality by comparing each attribute.
@@ -90,7 +119,8 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          detail == o.detail
+          layers == o.layers &&
+          warnings == o.warnings
     end
 
     # @see the `==` method
@@ -102,7 +132,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [detail].hash
+      [layers, warnings].hash
     end
 
     # Builds the object from hash

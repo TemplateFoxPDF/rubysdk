@@ -14,13 +14,30 @@ require 'date'
 require 'time'
 
 module TemplateFox
-  class HTTPValidationError < ApiModelBase
-    attr_accessor :detail
+  # An addressable layer of a template (modifications API)
+  class TemplateLayer < ApiModelBase
+    # Layer name — the value to use in `modifications[].name`
+    attr_accessor :name
+
+    # HTML tag of the element
+    attr_accessor :tag
+
+    # Layer type: `background`, `image`, `text` or `shape`
+    attr_accessor :type
+
+    attr_accessor :current_text
+
+    # Modification fields that apply to this layer
+    attr_accessor :modifiable
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'detail' => :'detail'
+        :'name' => :'name',
+        :'tag' => :'tag',
+        :'type' => :'type',
+        :'current_text' => :'current_text',
+        :'modifiable' => :'modifiable'
       }
     end
 
@@ -37,13 +54,18 @@ module TemplateFox
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'detail' => :'Array<ValidationError>'
+        :'name' => :'String',
+        :'tag' => :'String',
+        :'type' => :'String',
+        :'current_text' => :'String',
+        :'modifiable' => :'Array<String>'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'current_text',
       ])
     end
 
@@ -51,22 +73,46 @@ module TemplateFox
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::HTTPValidationError` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `TemplateFox::TemplateLayer` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::HTTPValidationError`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `TemplateFox::TemplateLayer`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'detail')
-        if (value = attributes[:'detail']).is_a?(Array)
-          self.detail = value
+      if attributes.key?(:'name')
+        self.name = attributes[:'name']
+      else
+        self.name = nil
+      end
+
+      if attributes.key?(:'tag')
+        self.tag = attributes[:'tag']
+      else
+        self.tag = nil
+      end
+
+      if attributes.key?(:'type')
+        self.type = attributes[:'type']
+      else
+        self.type = nil
+      end
+
+      if attributes.key?(:'current_text')
+        self.current_text = attributes[:'current_text']
+      end
+
+      if attributes.key?(:'modifiable')
+        if (value = attributes[:'modifiable']).is_a?(Array)
+          self.modifiable = value
         end
+      else
+        self.modifiable = nil
       end
     end
 
@@ -75,6 +121,22 @@ module TemplateFox
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @name.nil?
+        invalid_properties.push('invalid value for "name", name cannot be nil.')
+      end
+
+      if @tag.nil?
+        invalid_properties.push('invalid value for "tag", tag cannot be nil.')
+      end
+
+      if @type.nil?
+        invalid_properties.push('invalid value for "type", type cannot be nil.')
+      end
+
+      if @modifiable.nil?
+        invalid_properties.push('invalid value for "modifiable", modifiable cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -82,7 +144,51 @@ module TemplateFox
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @name.nil?
+      return false if @tag.nil?
+      return false if @type.nil?
+      return false if @modifiable.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] name Value to be assigned
+    def name=(name)
+      if name.nil?
+        fail ArgumentError, 'name cannot be nil'
+      end
+
+      @name = name
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] tag Value to be assigned
+    def tag=(tag)
+      if tag.nil?
+        fail ArgumentError, 'tag cannot be nil'
+      end
+
+      @tag = tag
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] type Value to be assigned
+    def type=(type)
+      if type.nil?
+        fail ArgumentError, 'type cannot be nil'
+      end
+
+      @type = type
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] modifiable Value to be assigned
+    def modifiable=(modifiable)
+      if modifiable.nil?
+        fail ArgumentError, 'modifiable cannot be nil'
+      end
+
+      @modifiable = modifiable
     end
 
     # Checks equality by comparing each attribute.
@@ -90,7 +196,11 @@ module TemplateFox
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          detail == o.detail
+          name == o.name &&
+          tag == o.tag &&
+          type == o.type &&
+          current_text == o.current_text &&
+          modifiable == o.modifiable
     end
 
     # @see the `==` method
@@ -102,7 +212,7 @@ module TemplateFox
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [detail].hash
+      [name, tag, type, current_text, modifiable].hash
     end
 
     # Builds the object from hash
